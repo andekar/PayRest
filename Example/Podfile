@@ -1,0 +1,11 @@
+source 'https://github.com/CocoaPods/Specs.git'
+
+target 'PayRest', :exclusive => true do
+  pod "PayRest", :path => "../"
+end
+
+target 'Tests', :exclusive => true do
+  pod "PayRest", :path => "../"
+
+  
+end
