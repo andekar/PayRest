@@ -7,12 +7,14 @@
 //
 
 #import "PayAppDelegate.h"
+#import "RestKit.h"
 
 @implementation PayAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    RKLogConfigureByName("RestKit/*", RKLogLevelTrace);
     return YES;
 }
 							

@@ -1,11 +1,12 @@
 source 'https://github.com/CocoaPods/Specs.git'
 
 target 'PayRest', :exclusive => true do
-  pod "PayRest", :path => "../"
+    pod "PayRest", :path => "../"
+    pod 'RestKit', '~> 0.24.0'
+    pod 'Base64nl', '~> 1.2'
 end
 
 target 'Tests', :exclusive => true do
   pod "PayRest", :path => "../"
 
-  
 end

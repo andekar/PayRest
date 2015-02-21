@@ -10,14 +10,14 @@
 Pod::Spec.new do |s|
   s.name             = "PayRest"
   s.version          = "0.1.0"
-  s.summary          = "A short description of PayRest."
+  s.summary          = "A lib to handle rest part of PayApp"
   s.description      = <<-DESC
                        An optional longer description of PayRest
 
                        * Markdown format.
                        * Don't worry about the indent, we strip it!
                        DESC
-  s.homepage         = "https://github.com/<GITHUB_USERNAME>/PayRest"
+  s.homepage         = "https://github.com/andekar/PayRest"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
   s.license          = 'MIT'
   s.author           = { "Anders" => "andersk84@gmail.com" }
@@ -35,4 +35,7 @@ Pod::Spec.new do |s|
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
+  s.dependency 'RestKit', '~> 0.24.0'
+  s.dependency 'Base64nl', '~> 1.2'
+
 end
