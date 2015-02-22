@@ -39,13 +39,13 @@ static PayUserRequests *sPayUserRequests;
 
 - (void)configureForUrl:(NSString *)baseUrl auth:(NSString *)auth
 {
-
+    
     // initialize AFNetworking HTTPClient
     NSURL *baseURL = [NSURL URLWithString:baseUrl];
     AFHTTPClient *client = [[AFHTTPClient alloc] initWithBaseURL:baseURL];
     
     RKObjectManager *objectManager = [[RKObjectManager alloc] initWithHTTPClient:client];
-
+    
     NSString *pv = @"0.37";
     NSString *ua = @"PayApp/1.6 CFNetwork/709.1 Darwin/13.3.0";
     [client setDefaultHeader:@"User-Agent" value:ua];
@@ -105,9 +105,9 @@ static PayUserRequests *sPayUserRequests;
     
 }
 
-- (void) loadTransactions:(int) numTransactions success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
+- (void) loadTransactions:(NSNumber*) numTransactions success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
 {
-    NSString *url = [@"/payapp/transactions/" stringByAppendingString:[[NSNumber numberWithInt:numTransactions]stringValue]];
+    NSString *url = [@"/payapp/transactions/" stringByAppendingString:[numTransactions stringValue]];
     [[RKObjectManager sharedManager] getObjectsAtPath:url //todo number
                                            parameters:nil
                                               success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {// todo return
@@ -119,9 +119,9 @@ static PayUserRequests *sPayUserRequests;
                                               }];
 }
 
-- (void) loadTransactionsFrom:(int) from to:(int) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure
+- (void) loadTransactionsFrom:(NSNumber*) from to:(NSNumber*) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure
 {
-    NSString *url = [@"/payapp/transactions/" stringByAppendingFormat:@"%i/%i",from,to];
+    NSString *url = [@"/payapp/transactions/" stringByAppendingFormat:@"%i/%i",[from intValue],[to intValue]];
     [[RKObjectManager sharedManager] getObjectsAtPath:url //todo number
                                            parameters:nil
                                               success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {// todo return
@@ -133,18 +133,33 @@ static PayUserRequests *sPayUserRequests;
                                               }];
 }
 
-- (void) loadTransactionsToUserId:(NSString *) userid from:(int) from to:(int) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure
+// below "to" can also be numTransactions
+- (void) loadTransactionsToUserId:(NSString *) userid from:(NSNumber*) from to:(NSNumber*) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure
 {
-    NSString *url = [@"/payapp/transactions/" stringByAppendingFormat:@"%@/%i/%i",userid,from,to];
-    [[RKObjectManager sharedManager] getObjectsAtPath:url //todo number
-                                           parameters:nil
-                                              success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {// todo return
-                                                  NSArray *arr = [[mappingResult dictionary] objectForKey:@"transaction"];
-                                                  success(arr);
-                                              }
-                                              failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                  failure();
-                                              }];
+    if(!userid)
+    {
+        if(!from)
+        {
+            [self loadTransactions:to success:success failure:failure];
+        }
+        else
+        {
+            [self loadTransactionsFrom:from to:to success:success failure:failure];
+        }
+    }
+    else
+    {
+        NSString *url = [@"/payapp/transactions/" stringByAppendingFormat:@"%@/%i/%i",userid,[from intValue],[to intValue]];
+        [[RKObjectManager sharedManager] getObjectsAtPath:url //todo number
+                                               parameters:nil
+                                                  success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {// todo return
+                                                      NSArray *arr = [[mappingResult dictionary] objectForKey:@"transaction"];
+                                                      success(arr);
+                                                  }
+                                                  failure:^(RKObjectRequestOperation *operation, NSError *error) {
+                                                      failure();
+                                                  }];
+    }
 }
 
 #pragma debt stuff
@@ -483,7 +498,7 @@ static PayUserRequests *sPayUserRequests;
                                                                                               pathPattern:nil
                                                                                                   keyPath:nil
                                                                                               statusCodes:RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful)];
-    [objectManager addResponseDescriptor:successResponseDescriptor];    
+    [objectManager addResponseDescriptor:successResponseDescriptor];
 }
 
 - (void) countryMapping:(RKObjectManager *)objectManager

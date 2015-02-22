@@ -19,9 +19,10 @@
 - (void) loadUsers:(void (^)(NSArray *users))success failure:(void (^)())failure uids:(NSArray*) uids;
 - (void) loadDebts:(void (^)(NSArray *debts))success failure:(void (^)())failure;
 //transactions/[num] | [from]/[num] | [userid]/[from]/[num]
-- (void) loadTransactions:(int) numTransactions success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
-- (void) loadTransactionsFrom:(int) from to:(int) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
-- (void) loadTransactionsToUserId:(NSString *) userid from:(int) from to:(int) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
+- (void) loadTransactions:(NSNumber *) numTransactions success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
+- (void) loadTransactionsFrom:(NSNumber *) from to:(NSNumber *) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
+// below will choose correct one
+- (void) loadTransactionsToUserId:(NSString *) userid from:(NSNumber *) from to:(NSNumber *) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
 
 - (void) loadCountries:(void (^)(NSArray *countries))success failure:(void (^)())failure;
 - (void) loadExchangeRates:(void (^)(NSArray *rates))success failure:(void (^)())failure;
