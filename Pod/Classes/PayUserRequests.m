@@ -105,9 +105,38 @@ static PayUserRequests *sPayUserRequests;
     
 }
 
-- (void) loadTransactions:(void (^)(NSArray *transactions))success failure:(void (^)())failure
+- (void) loadTransactions:(int) numTransactions success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
 {
-    [[RKObjectManager sharedManager] getObjectsAtPath:@"/payapp/transactions/100" //todo number
+    NSString *url = [@"/payapp/transactions/" stringByAppendingString:[[NSNumber numberWithInt:numTransactions]stringValue]];
+    [[RKObjectManager sharedManager] getObjectsAtPath:url //todo number
+                                           parameters:nil
+                                              success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {// todo return
+                                                  NSArray *arr = [[mappingResult dictionary] objectForKey:@"transaction"];
+                                                  success(arr);
+                                              }
+                                              failure:^(RKObjectRequestOperation *operation, NSError *error) {
+                                                  failure();
+                                              }];
+}
+
+- (void) loadTransactionsFrom:(int) from to:(int) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure
+{
+    NSString *url = [@"/payapp/transactions/" stringByAppendingFormat:@"%i/%i",from,to];
+    [[RKObjectManager sharedManager] getObjectsAtPath:url //todo number
+                                           parameters:nil
+                                              success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {// todo return
+                                                  NSArray *arr = [[mappingResult dictionary] objectForKey:@"transaction"];
+                                                  success(arr);
+                                              }
+                                              failure:^(RKObjectRequestOperation *operation, NSError *error) {
+                                                  failure();
+                                              }];
+}
+
+- (void) loadTransactionsToUserId:(NSString *) userid from:(int) from to:(int) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure
+{
+    NSString *url = [@"/payapp/transactions/" stringByAppendingFormat:@"%@/%i/%i",userid,from,to];
+    [[RKObjectManager sharedManager] getObjectsAtPath:url //todo number
                                            parameters:nil
                                               success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {// todo return
                                                   NSArray *arr = [[mappingResult dictionary] objectForKey:@"transaction"];
@@ -173,16 +202,13 @@ static PayUserRequests *sPayUserRequests;
     [[RKObjectManager sharedManager] postObject:wrapperArr path:url parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         NSLog(@"success");
         NSDictionary *dict = [mappingResult dictionary];
-        NSArray *errors = [dict objectForKey:@""];
         NSArray *users = [dict objectForKey:@"user"];
-        long countUsers = [users count] - [errors count];
         NSMutableArray *realUsers = [[NSMutableArray alloc] init];
         for(PayUser *usr in users)
         {
             if([usr internal_uid])
                 [realUsers addObject:usr];
         }
-        assert([realUsers count] == countUsers);
         success(realUsers);
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
         NSLog(@"failed");
@@ -208,21 +234,17 @@ static PayUserRequests *sPayUserRequests;
                                            parameters:nil
                                               success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
                                                   NSDictionary *dict = [mappingResult dictionary];
-                                                  NSArray *errors = [dict objectForKey:@""];
                                                   NSArray *users = [dict objectForKey:@"user"];
-                                                  long countUsers = [users count] - [errors count];
                                                   NSMutableArray *realUsers = [[NSMutableArray alloc] init];
                                                   for(PayUser *usr in users)
                                                   {
                                                       if([usr internal_uid])
                                                           [realUsers addObject:usr];
                                                   }
-                                                  assert([realUsers count] == countUsers);
                                                   success(realUsers);
                                                   
                                               }
                                               failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                  NSLog(@"What do you mean by 'there is no coffee?': %@", error);
                                                   failure();
                                               }];
 }
@@ -420,8 +442,6 @@ static PayUserRequests *sPayUserRequests;
     [transactionRequestMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"org_transaction" toKeyPath:@"org_transaction" withMapping:orgTransactionRMapping]];
     
     // Now configure the request descriptor
-    //    RKRequestDescriptor *requestDescriptor = [RKRequestDescriptor requestDescriptorWithMapping:transactionRequestMapping objectClass:[PayTransaction class] rootKeyPath:@"transaction" method:RKRequestMethodPOST];
-    
     
     RKObjectMapping* wrapperTransactionRMapping = [RKObjectMapping requestMapping ]; // Shortcut for
     [wrapperTransactionRMapping addAttributeMappingsFromArray:@[]];
@@ -441,20 +461,29 @@ static PayUserRequests *sPayUserRequests;
                                             statusCodes:[NSIndexSet indexSetWithIndex:200]];
     [objectManager addResponseDescriptor:rresponseDescriptor];
     
+    RKResponseDescriptor *rresponseDescriptor2 =
+    [RKResponseDescriptor responseDescriptorWithMapping:payTransactionMapping
+                                                 method:RKRequestMethodAny
+                                            pathPattern:@"/payapp/transactions/:from/:to"
+                                                keyPath:@"transaction"
+                                            statusCodes:[NSIndexSet indexSetWithIndex:200]];
+    [objectManager addResponseDescriptor:rresponseDescriptor2];
+    
+    RKResponseDescriptor *rresponseDescriptor3 =
+    [RKResponseDescriptor responseDescriptorWithMapping:payTransactionMapping
+                                                 method:RKRequestMethodAny
+                                            pathPattern:@"/payapp/transactions/:id/:from/:to"
+                                                keyPath:@"transaction"
+                                            statusCodes:[NSIndexSet indexSetWithIndex:200]];
+    [objectManager addResponseDescriptor:rresponseDescriptor3];
+    
+    
     RKResponseDescriptor *successResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:[RKObjectMapping mappingForClass:nil]
                                                                                                    method:RKRequestMethodDELETE
                                                                                               pathPattern:nil
                                                                                                   keyPath:nil
                                                                                               statusCodes:RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful)];
-    [objectManager addResponseDescriptor:successResponseDescriptor];
-    //    RKResponseDescriptor *responseDescriptor2 =
-    //    [RKResponseDescriptor responseDescriptorWithMapping:nil
-    //                                                 method:RKRequestMethodDELETE
-    //                                            pathPattern:@"/payapp/transactions/:id"
-    //                                                keyPath:nil
-    //                                            statusCodes:[NSIndexSet indexSetWithIndex:204]];
-    //    [objectManager addResponseDescriptor:responseDescriptor2];
-    
+    [objectManager addResponseDescriptor:successResponseDescriptor];    
 }
 
 - (void) countryMapping:(RKObjectManager *)objectManager

@@ -18,7 +18,10 @@
 #pragma load
 - (void) loadUsers:(void (^)(NSArray *users))success failure:(void (^)())failure uids:(NSArray*) uids;
 - (void) loadDebts:(void (^)(NSArray *debts))success failure:(void (^)())failure;
-- (void) loadTransactions:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
+//transactions/[num] | [from]/[num] | [userid]/[from]/[num]
+- (void) loadTransactions:(int) numTransactions success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
+- (void) loadTransactionsFrom:(int) from to:(int) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
+- (void) loadTransactionsToUserId:(NSString *) userid from:(int) from to:(int) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
 
 - (void) loadCountries:(void (^)(NSArray *countries))success failure:(void (^)())failure;
 - (void) loadExchangeRates:(void (^)(NSArray *rates))success failure:(void (^)())failure;
