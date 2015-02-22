@@ -10,6 +10,7 @@
 #import "PayUserRequests.h"
 #import "PayUser.h"
 #import "PayTransaction.h"
+#import "Base64.h"
 
 @interface PayViewController ()
 
@@ -20,6 +21,12 @@
 - (void)viewDidLoad
 {
     PayUserRequests *pr = [PayUserRequests payUserRequests];
+    NSString *str1 =  [NSString stringWithFormat: @"%@:%@:%@", @"debug", @"andersk84@gmail.com"
+                       , @"114115257233622203470"];
+    NSString *str2 = [str1 base64EncodedString];
+    NSLog(@"Basic %@ str1 %@", str2,str1);
+    NSString *baseUrl = @"https://test.payapp.iamanders.se:8443";
+    [pr configureForUrl:baseUrl auth:str2];
     
 //    PayUser *testUser = [PayUser new];
 //    testUser.user_type = @"local";

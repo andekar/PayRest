@@ -8,7 +8,6 @@
 
 #import "PayUserRequests.h"
 #import "RestKit.h"
-#import "Base64.h"
 #import "PayError.h"
 #import "PayDebt.h"
 #import "PayEditDetails.h"
@@ -18,9 +17,13 @@
 #import "PayExchangeRate.h"
 #import "PayTransactionWrapper.h"
 #import "PayUserWrapper.h"
+@interface PayUserRequests ()
+
+@property (nonatomic) BOOL initialized;
+
+@end
 
 @implementation PayUserRequests
-
 
 static PayUserRequests *sPayUserRequests;
 + (PayUserRequests *) payUserRequests {
@@ -31,26 +34,23 @@ static PayUserRequests *sPayUserRequests;
     NSAssert(self == [PayUserRequests class],
              @"PayUserRequests is not designed to be subclassed", nil);
     sPayUserRequests = [PayUserRequests new];
-    [sPayUserRequests configureRestKit];
+    sPayUserRequests.initialized = NO;
 }
 
-- (void)configureRestKit
+- (void)configureForUrl:(NSString *)baseUrl auth:(NSString *)auth
 {
+
     // initialize AFNetworking HTTPClient
-    NSURL *baseURL = [NSURL URLWithString:@"https://test.payapp.iamanders.se:8443"];
+    NSURL *baseURL = [NSURL URLWithString:baseUrl];
     AFHTTPClient *client = [[AFHTTPClient alloc] initWithBaseURL:baseURL];
     
-    // initialize RestKit
     RKObjectManager *objectManager = [[RKObjectManager alloc] initWithHTTPClient:client];
-    NSString *str1 =  [NSString stringWithFormat: @"%@:%@:%@", @"debug", @"andersk84@gmail.com"
-                       , @"114115257233622203470"];
-    NSString *str2 = [str1 base64EncodedString];
-    NSLog(@"Basic %@ str1 %@", str2,str1);
+
     NSString *pv = @"0.37";
     NSString *ua = @"PayApp/1.6 CFNetwork/709.1 Darwin/13.3.0";
     [client setDefaultHeader:@"User-Agent" value:ua];
     [client setDefaultHeader:@"protocolversion" value:pv];
-    [client setDefaultHeader:@"Authorization" value:[NSString stringWithFormat:@"Basic %@",str2]];
+    [client setDefaultHeader:@"Authorization" value:[NSString stringWithFormat:@"Basic %@",auth]];
     [client setAllowsInvalidSSLCertificate:YES];
     
     [RKMIMETypeSerialization registerClass:[RKNSJSONSerialization class] forMIMEType:@"text/html"];
@@ -70,7 +70,7 @@ static PayUserRequests *sPayUserRequests;
     [self countryMapping:objectManager];
     
     [self exchangeRateMapping:objectManager];
-    
+    self.initialized = YES;
 }
 
 #pragma Transaction stuff
