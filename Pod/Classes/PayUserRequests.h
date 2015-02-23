@@ -32,7 +32,7 @@
 - (void) postUsers:(NSArray *) userArr success:(void (^)(NSArray *debts))success failure:(void (^)())failure;
 
 #pragma put
-- (void) putUser:(PayUser *) user;
+- (void) putUser:(PayUser *) user success:(void (^)(PayUser *pu))success failure:(void (^)())failure;
 
 #pragma delete
 - (void) deleteDebtToUser:(NSString *) userid  success:(void (^)())success failure:(void (^)())failure;

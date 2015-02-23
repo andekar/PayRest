@@ -187,17 +187,14 @@ static PayUserRequests *sPayUserRequests;
 }
 
 #pragma user stuff
-- (void) putUser:(PayUser *) user
+- (void) putUser:(PayUser *) user success:(void (^)(PayUser *pu))success failure:(void (^)())failure
 {
     NSString *url = @"/payapp/users";
-    user.displayname = @"anders";
     [RKObjectManager sharedManager].requestSerializationMIMEType=RKMIMETypeJSON;
     [[RKObjectManager sharedManager] putObject:user path:url parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
-        NSLog(@"success");
-        //        success(realUsers);
+        success(user);
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        NSLog(@"failed");
-        //        failure();
+        failure();
     }];
 }
 
