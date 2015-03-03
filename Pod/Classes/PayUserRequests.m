@@ -199,7 +199,7 @@ static PayUserRequests *sPayUserRequests;
 }
 
 
-- (void) postUsers:(NSArray *) userarr success:(void (^)(NSArray *debts))success failure:(void (^)())failure
+- (void) postUsers:(NSArray *) userarr success:(void (^)(NSArray *pus))success failure:(void (^)())failure
 {
     NSString *url = @"/payapp/users";
     NSMutableArray *wrapperArr = [NSMutableArray new];
@@ -359,7 +359,7 @@ static PayUserRequests *sPayUserRequests;
     // POST MAPPING
     // Configure a request mapping for our transaction class.
     RKObjectMapping* userRequestMapping = [RKObjectMapping requestMapping ]; // Shortcut for [RKObjectMapping mappingForClass:[NSMutableDictionary class] ]
-    [userRequestMapping addAttributeMappingsFromArray:@[@"user_type", @"currency", @"echo_uuid",  @"uid", @"displayname"]];
+    [userRequestMapping addAttributeMappingsFromArray:@[@"user_type", @"currency", @"echo_uuid",  @"uid", @"username", @"displayname"]];
     
     // Now configure the request descriptor
     //    RKRequestDescriptor *requestDescriptor = [RKRequestDescriptor requestDescriptorWithMapping:userRequestMapping objectClass:[PayUser class] rootKeyPath:@"user" method:RKRequestMethodPOST];

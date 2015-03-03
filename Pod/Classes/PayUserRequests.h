@@ -29,7 +29,7 @@
 
 #pragma post
 - (void) postTransactions:(NSArray *) transactions success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
-- (void) postUsers:(NSArray *) userArr success:(void (^)(NSArray *debts))success failure:(void (^)())failure;
+- (void) postUsers:(NSArray *) userArr success:(void (^)(NSArray *pus))success failure:(void (^)())failure;
 
 #pragma put
 - (void) putUser:(PayUser *) user success:(void (^)(PayUser *pu))success failure:(void (^)())failure;
