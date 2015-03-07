@@ -17,6 +17,8 @@
 #import "PayExchangeRate.h"
 #import "PayTransactionWrapper.h"
 #import "PayUserWrapper.h"
+#import "PayTransferDebt.h"
+
 @interface PayUserRequests ()
 
 @property (nonatomic) BOOL initialized;
@@ -70,6 +72,9 @@ static PayUserRequests *sPayUserRequests;
     [self countryMapping:objectManager];
     
     [self exchangeRateMapping:objectManager];
+    
+    [self iosTokenMapping:objectManager];
+    
     self.initialized = YES;
 }
 
@@ -186,6 +191,20 @@ static PayUserRequests *sPayUserRequests;
                                               }];
 }
 
+- (void) transferDebtsFrom:(PayUser *) from to:(PayUser *) pu success:(void (^)())success failure:(void (^)())failure
+{
+    PayTransferDebt *td = [PayTransferDebt new];
+    [RKObjectManager sharedManager].requestSerializationMIMEType=RKMIMETypeJSON;
+    td.n_uid = pu.internal_uid;
+    td.old_uid = from.internal_uid;
+    [[RKObjectManager sharedManager] putObject:td path:@"/payapp/debts" parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+        success();
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        failure();
+    }];
+}
+
+
 #pragma user stuff
 - (void) putUser:(PayUser *) user success:(void (^)(PayUser *pu))success failure:(void (^)())failure
 {
@@ -296,6 +315,23 @@ static PayUserRequests *sPayUserRequests;
                                                   failure();
                                               }];
 }
+
+#pragma ios_token stuff
+- (void) postIOSToken:(PayIOSToken *) token success:(void (^)())success failure:(void (^)())failure
+{
+    NSString *url = @"/payapp/ios_token";
+    
+    [RKObjectManager sharedManager].requestSerializationMIMEType=RKMIMETypeJSON;
+    [[RKObjectManager sharedManager] postObject:token path:url parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+        
+        success();
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        NSLog(@"failed");
+        failure();
+    }];
+    
+}
+
 #pragma mappings
 - (void) errorMapping:(RKObjectManager *)objectManager
 {
@@ -357,9 +393,9 @@ static PayUserRequests *sPayUserRequests;
     //    user_edit_details
     
     // POST MAPPING
-    // Configure a request mapping for our transaction class.
+    // Configure a request mapping for our user class.
     RKObjectMapping* userRequestMapping = [RKObjectMapping requestMapping ]; // Shortcut for [RKObjectMapping mappingForClass:[NSMutableDictionary class] ]
-    [userRequestMapping addAttributeMappingsFromArray:@[@"user_type", @"currency", @"echo_uuid",  @"uid", @"username", @"displayname"]];
+    [userRequestMapping addAttributeMappingsFromArray:@[@"user_type", @"currency", @"echo_uuid",  @"uid", @"displayname"]];
     
     // Now configure the request descriptor
     //    RKRequestDescriptor *requestDescriptor = [RKRequestDescriptor requestDescriptorWithMapping:userRequestMapping objectClass:[PayUser class] rootKeyPath:@"user" method:RKRequestMethodPOST];
@@ -372,7 +408,7 @@ static PayUserRequests *sPayUserRequests;
     [objectManager addRequestDescriptor:requestDescriptor];
     
     // PUT MAPPING
-    // Configure a request mapping for our transaction class.
+    // Configure a request mapping for our user class.
     RKObjectMapping* userPostRequestMapping = [RKObjectMapping requestMapping ]; // Shortcut for [RKObjectMapping mappingForClass:[NSMutableDictionary class] ]
     [userPostRequestMapping addAttributeMappingsFromArray:@[@"displayname", @"currency"]];
     
@@ -408,6 +444,20 @@ static PayUserRequests *sPayUserRequests;
     
     
     [objectManager addResponseDescriptor:responseDescriptor];
+    
+    
+    // PUT MAPPING
+    // Configure a request mapping for our user class.
+    RKObjectMapping* transferDebtRequestMapping = [RKObjectMapping requestMapping ]; // Shortcut for [RKObjectMapping mappingForClass:[NSMutableDictionary class] ]
+//    [transferDebtRequestMapping addAttributeMappingsFromArray:@[@"", @"currency"]];
+    [transferDebtRequestMapping addAttributeMappingsFromDictionary:[[NSDictionary alloc] initWithObjects:@[@"old_uid", @"new_uid"] forKeys:@[@"old_uid", @"n_uid"]]];
+    
+    // Now configure the request descriptor
+    RKRequestDescriptor *requestPostDescriptor = [RKRequestDescriptor requestDescriptorWithMapping:transferDebtRequestMapping objectClass:[PayTransferDebt class] rootKeyPath:nil method:RKRequestMethodPUT];
+    
+    
+    [objectManager addRequestDescriptor:requestPostDescriptor];
+    
 }
 
 - (void) transactionsMapping:(RKObjectManager *)objectManager
@@ -534,6 +584,20 @@ static PayUserRequests *sPayUserRequests;
     
     
     [objectManager addResponseDescriptor:responseDescriptor];
+}
+
+- (void) iosTokenMapping:(RKObjectManager *)objectManager
+{
+    // POST MAPPING
+    // Configure a request mapping for our ios_token class.
+    RKObjectMapping* iosRequestMapping = [RKObjectMapping requestMapping ];
+    [iosRequestMapping addAttributeMappingsFromArray:@[@"ios_token"]];
+    
+    
+    RKRequestDescriptor *requestDescriptor = [RKRequestDescriptor requestDescriptorWithMapping:iosRequestMapping objectClass:[PayIOSToken class] rootKeyPath:nil method:RKRequestMethodPOST];
+    
+    
+    [objectManager addRequestDescriptor:requestDescriptor];
 }
 
 @end

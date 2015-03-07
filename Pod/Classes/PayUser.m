@@ -10,12 +10,4 @@
 
 @implementation PayUser
 
--(void) setUid:(NSString *)uid
-{
-    if(!self.username)
-    {
-        self.username = uid;
-    }
-    _uid = uid;
-}
 @end

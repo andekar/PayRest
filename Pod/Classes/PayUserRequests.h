@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "PayUser.h"
 #import "PayTransaction.h"
+#import "PayIOSToken.h"
 
 @interface PayUserRequests : NSObject
 + (PayUserRequests *) payUserRequests;
@@ -30,9 +31,11 @@
 #pragma post
 - (void) postTransactions:(NSArray *) transactions success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
 - (void) postUsers:(NSArray *) userArr success:(void (^)(NSArray *pus))success failure:(void (^)())failure;
+- (void) postIOSToken:(PayIOSToken *) token success:(void (^)())success failure:(void (^)())failure;
 
 #pragma put
 - (void) putUser:(PayUser *) user success:(void (^)(PayUser *pu))success failure:(void (^)())failure;
+- (void) transferDebtsFrom:(PayUser *) from to:(PayUser *) pu success:(void (^)())success failure:(void (^)())failure;
 
 #pragma delete
 - (void) deleteDebtToUser:(NSString *) userid  success:(void (^)())success failure:(void (^)())failure;
