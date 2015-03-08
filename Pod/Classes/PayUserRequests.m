@@ -29,6 +29,10 @@
 
 static PayUserRequests *sPayUserRequests;
 + (PayUserRequests *) payUserRequests {
+    if(!sPayUserRequests)
+    {
+        [self initialize];
+    }
     return sPayUserRequests;
 }
 
@@ -41,7 +45,11 @@ static PayUserRequests *sPayUserRequests;
 
 - (void)configureForUrl:(NSString *)baseUrl auth:(NSString *)auth
 {
-    
+    if(self.initialized)
+    {
+        [[[RKObjectManager sharedManager] HTTPClient] setDefaultHeader:@"Authorization" value:[NSString stringWithFormat:@"Basic %@",auth]];
+        return;
+    }
     // initialize AFNetworking HTTPClient
     NSURL *baseURL = [NSURL URLWithString:baseUrl];
     AFHTTPClient *client = [[AFHTTPClient alloc] initWithBaseURL:baseURL];
