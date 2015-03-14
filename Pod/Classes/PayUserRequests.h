@@ -10,6 +10,7 @@
 #import "PayUser.h"
 #import "PayTransaction.h"
 #import "PayIOSToken.h"
+#import "PayRate.h"
 
 @interface PayUserRequests : NSObject
 + (PayUserRequests *) payUserRequests;
@@ -27,6 +28,7 @@
 
 - (void) loadCountries:(void (^)(NSArray *countries))success failure:(void (^)())failure;
 - (void) loadExchangeRates:(void (^)(NSArray *rates))success failure:(void (^)())failure;
+- (void) loadRates:(void (^)(NSArray *rates))success failure:(void (^)())failure;
 
 #pragma post
 - (void) postTransactions:(NSArray *) transactions success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;

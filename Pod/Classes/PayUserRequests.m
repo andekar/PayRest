@@ -19,6 +19,7 @@
 #import "PayUserWrapper.h"
 #import "PayTransferDebt.h"
 
+
 @interface PayUserRequests ()
 
 @property (nonatomic) BOOL initialized;
@@ -80,6 +81,8 @@ static PayUserRequests *sPayUserRequests;
     [self countryMapping:objectManager];
     
     [self exchangeRateMapping:objectManager];
+    
+    [self rateMapping:objectManager];
     
     [self iosTokenMapping:objectManager];
     
@@ -302,7 +305,6 @@ static PayUserRequests *sPayUserRequests;
                                                   
                                               }
                                               failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                  NSLog(@"What do you mean by 'there is no coffee?': %@", error);
                                                   failure();
                                               }];
 }
@@ -319,7 +321,23 @@ static PayUserRequests *sPayUserRequests;
                                                   
                                               }
                                               failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                  NSLog(@"What do you mean by 'there is no coffee?': %@", error);
+                                                  failure();
+                                              }];
+}
+
+
+- (void) loadRates:(void (^)(NSArray *rates))success failure:(void (^)())failure
+{
+    NSString *url = @"/payapp/crates/";
+    [[RKObjectManager sharedManager] getObjectsAtPath:url
+                                           parameters:nil
+                                              success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+                                                  NSDictionary *dict = [mappingResult dictionary];
+                                                  NSArray *rates = [dict objectForKey:@"exchange_rate"];
+                                                  success(rates);
+                                                  
+                                              }
+                                              failure:^(RKObjectRequestOperation *operation, NSError *error) {
                                                   failure();
                                               }];
 }
@@ -587,6 +605,24 @@ static PayUserRequests *sPayUserRequests;
     [RKResponseDescriptor responseDescriptorWithMapping:payExchangeMapping
                                                  method:RKRequestMethodGET
                                             pathPattern:@"/payapp/rates/"
+                                                keyPath:@"exchange_rate"
+                                            statusCodes:[NSIndexSet indexSetWithIndex:200]];
+    
+    
+    [objectManager addResponseDescriptor:responseDescriptor];
+}
+
+- (void) rateMapping:(RKObjectManager *)objectManager
+{
+    RKObjectMapping *payExchangeMapping = [RKObjectMapping mappingForClass:[PayRate class]];
+    [payExchangeMapping addAttributeMappingsFromArray:@[@"country_code", @"country_name", @"rate"]];
+    
+    
+    // register mappings with the provider using a response descriptor
+    RKResponseDescriptor *responseDescriptor =
+    [RKResponseDescriptor responseDescriptorWithMapping:payExchangeMapping
+                                                 method:RKRequestMethodGET
+                                            pathPattern:@"/payapp/crates/"
                                                 keyPath:@"exchange_rate"
                                             statusCodes:[NSIndexSet indexSetWithIndex:200]];
     
