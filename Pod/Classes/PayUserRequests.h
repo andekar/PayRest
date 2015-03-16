@@ -15,7 +15,7 @@
 @interface PayUserRequests : NSObject
 + (PayUserRequests *) payUserRequests;
 
-- (void)configureForUrl:(NSString *) baseUrl auth:(NSString *) auth;
+- (void)configureForUrl:(NSString *) baseUrl auth:(NSString *) auth protocolversion:(NSString*) pv;
 
 #pragma load
 - (void) loadUsers:(void (^)(NSArray *users))success failure:(void (^)())failure uids:(NSArray*) uids;

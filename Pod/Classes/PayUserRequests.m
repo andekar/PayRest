@@ -44,7 +44,7 @@ static PayUserRequests *sPayUserRequests;
     sPayUserRequests.initialized = NO;
 }
 
-- (void)configureForUrl:(NSString *)baseUrl auth:(NSString *)auth
+- (void)configureForUrl:(NSString *)baseUrl auth:(NSString *)auth protocolversion:(NSString*) pv
 {
     if(self.initialized)
     {
@@ -57,11 +57,9 @@ static PayUserRequests *sPayUserRequests;
     
     RKObjectManager *objectManager = [[RKObjectManager alloc] initWithHTTPClient:client];
     
-    NSString *pv = @"0.37";
-    NSString *ua = @"PayApp/1.6 CFNetwork/709.1 Darwin/13.3.0";
-    [client setDefaultHeader:@"User-Agent" value:ua];
-    [client setDefaultHeader:@"protocolversion" value:pv];
+
     [client setDefaultHeader:@"Authorization" value:[NSString stringWithFormat:@"Basic %@",auth]];
+    [client setDefaultHeader:@"protocolversion" value:pv];
     [client setAllowsInvalidSSLCertificate:YES];
     
     [RKMIMETypeSerialization registerClass:[RKNSJSONSerialization class] forMIMEType:@"text/html"];
