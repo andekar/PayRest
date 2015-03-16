@@ -42,4 +42,5 @@
 #pragma delete
 - (void) deleteDebtToUser:(NSString *) userid  success:(void (^)())success failure:(void (^)())failure;
 - (void) deleteTransaction:(PayTransaction *) transaction success:(void (^)())success failure:(void (^)())failure;
+- (void) clearNotificationsSuccess:(void (^)())success failure:(void (^)())failure;
 @end

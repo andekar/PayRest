@@ -356,6 +356,18 @@ static PayUserRequests *sPayUserRequests;
     
 }
 
+- (void) clearNotificationsSuccess:(void (^)())success failure:(void (^)())failure
+{
+    
+    NSString *path = @"/payapp/ios_token/badge";
+    
+    [[RKObjectManager sharedManager] deleteObject:nil path:path parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
+        success();
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        failure();
+    } ];
+}
+
 #pragma mappings
 - (void) errorMapping:(RKObjectManager *)objectManager
 {
