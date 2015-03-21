@@ -7,10 +7,11 @@
 //
 
 #import "PayViewController.h"
-#import "PayUserRequests.h"
 #import "PayUser.h"
 #import "PayTransaction.h"
 #import "Base64.h"
+#import "PayIOSToken.h"
+#import "RestKit.h"
 
 @interface PayViewController ()
 
@@ -20,20 +21,43 @@
 
 - (void)viewDidLoad
 {
-    PayUserRequests *pr = [PayUserRequests payUserRequests];
+//    PayUserRequests *pr = [PayUserRequests payUserRequests];
     NSString *str1 =  [NSString stringWithFormat: @"%@:%@:%@", @"debug", @"andersk84@gmail.com"
                        , @"114115257233622203470"];
     NSString *str2 = [str1 base64EncodedString];
     NSLog(@"Basic %@ str1 %@", str2,str1);
+    NSString *pv = @"0.37";
     NSString *baseUrl = @"https://test.payapp.iamanders.se:8443";
-    [pr configureForUrl:baseUrl auth:str2];
+    [[PayUserRequests payUserRequests] configureForUrl:baseUrl auth:str2 protocolversion:pv];
     
-//    PayUser *testUser = [PayUser new];
-//    testUser.user_type = @"local";
-//    testUser.currency = @"SEK";
-//    testUser.echo_uuid = @"testecho";
-//    testUser.uid = @"testecho2";
-//    testUser.displayname = @"this is my displayname";
+    AFHTTPClient *client = [[RKObjectManager sharedManager] HTTPClient];
+    NSString *ua = @"PayApp/1.6 CFNetwork/709.1 Darwin/13.3.0";
+    [client setDefaultHeader:@"User-Agent" value:ua];
+    
+//    [[PayUserRequests payUserRequests] setDelegate:self];
+    
+    
+    PayUser *testUser = [PayUser new];
+    testUser.user_type = @"gmail";
+    testUser.currency = @"SEK";
+    testUser.echo_uuid = @"testecho";
+    testUser.uid = @"114115257233622203470";
+//    testUser.username = @"andersk84@gmail.com";
+    testUser.displayname = @"this is my displayname";
+//    [[PayUserRequests payUserRequests] loadRates:^(NSArray *rates) {
+//        NSLog(@"WHoa");
+//    } failure:^{
+//        assert(false);
+//    }];
+//    [[PayUserRequests payUserRequests] transferDebtsFrom:testUser to:testUser success:^{
+//        assert(true);
+//    } failure:^{
+//        assert(false);
+//    }];
+//    [[PayUserRequests payUserRequests] putUser:testUser success:^(PayUser *pu) {
+//    } failure:^{
+//        assert(false);
+//    }];
 //    //    PayUser *copy = testUser;
 //
 //    // create user first
@@ -43,7 +67,7 @@
 //        NSLog(@"failed");
 //        assert(false);
 //    }];
-//    
+//
 //    [pr loadUsers:^(NSArray *users) {
 //        NSLog(@"success with users");
 //    } failure:^{
@@ -69,10 +93,9 @@
 //        NSLog(@"failure");
 //        assert(false);
 //    }];
-//    [pr loadTransactions:^(NSArray *transactions) {
-//        NSLog(@"success");
-//    } failure:^{
-//        NSLog(@"failure");
+//    [[PayUserRequests payUserRequests] loadTransactions:[NSNumber numberWithInt:10] success:^(NSArray *transactions) {
+//        NSLog(@"Success");
+//    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
 //        assert(false);
 //    }];
 //
@@ -96,7 +119,14 @@
 //    } failure:^{
 //        assert(false);
 //    }];
-//    
+//    PayIOSToken *token = [PayIOSToken new];
+//    [token setIos_token:@"TOKENTOKEN"];
+//    [pr postIOSToken:token success:^() {
+//        NSLog(@"here");
+//    } failure:^{
+//        assert(false);
+//    }];
+//
 //    [pr deleteDebtToUser:@"testuser" success:^{
 //        NSLog(@"GOT OK!");
 //    } failure:^{
@@ -106,7 +136,6 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
 }
-
 
 
 - (void)didReceiveMemoryWarning

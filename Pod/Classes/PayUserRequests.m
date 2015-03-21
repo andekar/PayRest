@@ -19,11 +19,8 @@
 #import "PayUserWrapper.h"
 #import "PayTransferDebt.h"
 
-
 @interface PayUserRequests ()
-
 @property (nonatomic) BOOL initialized;
-
 @end
 
 @implementation PayUserRequests
@@ -57,7 +54,7 @@ static PayUserRequests *sPayUserRequests;
     
     RKObjectManager *objectManager = [[RKObjectManager alloc] initWithHTTPClient:client];
     
-
+    
     [client setDefaultHeader:@"Authorization" value:[NSString stringWithFormat:@"Basic %@",auth]];
     [client setDefaultHeader:@"protocolversion" value:pv];
     [client setAllowsInvalidSSLCertificate:YES];
@@ -88,18 +85,16 @@ static PayUserRequests *sPayUserRequests;
 }
 
 #pragma Transaction stuff
-- (void) deleteTransaction:(PayTransaction *) transaction success:(void (^)())success failure:(void (^)())failure
+- (void) deleteTransaction:(PayTransaction *) transaction success:(void (^)())success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     NSString *path = [@"/payapp/transactions/" stringByAppendingString:transaction.transaction_id];
     
     [[RKObjectManager sharedManager] deleteObject:nil path:path parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         success();
-    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        failure();
-    } ];
+    } failure:failure];
 }
 
-- (void) postTransactions:(NSArray *) transactions success:(void (^)(NSArray *transactions))success failure:(void (^)())failure
+- (void) postTransactions:(NSArray *) transactions success:(void (^)(NSArray *transactions))success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     NSMutableArray *myWrappers = [NSMutableArray new];
     for(PayTransaction *t in transactions)
@@ -113,13 +108,11 @@ static PayUserRequests *sPayUserRequests;
     [[RKObjectManager sharedManager] postObject:myWrappers path:@"/payapp/transactions/" parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         NSArray *arr = [mappingResult.dictionary objectForKey:@"transaction"];
         success(arr);
-    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        failure();
-    }];
+    } failure:failure];
     
 }
 
-- (void) loadTransactions:(NSNumber*) numTransactions success:(void (^)(NSArray *transactions))success failure:(void (^)())failure;
+- (void) loadTransactions:(NSNumber*) numTransactions success:(void (^)(NSArray *transactions))success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure;
 {
     NSString *url = [@"/payapp/transactions/" stringByAppendingString:[numTransactions stringValue]];
     [[RKObjectManager sharedManager] getObjectsAtPath:url //todo number
@@ -128,12 +121,10 @@ static PayUserRequests *sPayUserRequests;
                                                   NSArray *arr = [[mappingResult dictionary] objectForKey:@"transaction"];
                                                   success(arr);
                                               }
-                                              failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                  failure();
-                                              }];
+                                              failure:failure];
 }
 
-- (void) loadTransactionsFrom:(NSNumber*) from to:(NSNumber*) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure
+- (void) loadTransactionsFrom:(NSNumber*) from to:(NSNumber*) to success:(void (^)(NSArray *transactions))success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     NSString *url = [@"/payapp/transactions/" stringByAppendingFormat:@"%i/%i",[from intValue],[to intValue]];
     [[RKObjectManager sharedManager] getObjectsAtPath:url //todo number
@@ -142,13 +133,11 @@ static PayUserRequests *sPayUserRequests;
                                                   NSArray *arr = [[mappingResult dictionary] objectForKey:@"transaction"];
                                                   success(arr);
                                               }
-                                              failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                  failure();
-                                              }];
+                                              failure:failure];
 }
 
 // below "to" can also be numTransactions
-- (void) loadTransactionsToUserId:(NSString *) userid from:(NSNumber*) from to:(NSNumber*) to success:(void (^)(NSArray *transactions))success failure:(void (^)())failure
+- (void) loadTransactionsToUserId:(NSString *) userid from:(NSNumber*) from to:(NSNumber*) to success:(void (^)(NSArray *transactions))success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     if(!userid)
     {
@@ -170,23 +159,19 @@ static PayUserRequests *sPayUserRequests;
                                                       NSArray *arr = [[mappingResult dictionary] objectForKey:@"transaction"];
                                                       success(arr);
                                                   }
-                                                  failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                      failure();
-                                                  }];
+                                                  failure:failure];
     }
 }
 
 #pragma debt stuff
-- (void) deleteDebtToUser:(NSString *) userid success:(void (^)())success failure:(void (^)())failure
+- (void) deleteDebtToUser:(NSString *) userid success:(void (^)())success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     NSString *path = [@"/payapp/debts/" stringByAppendingString:userid];
     [[RKObjectManager sharedManager] deleteObject:nil path:path parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         success();
-    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        failure();
-    } ];
+    } failure:failure];
 }
-- (void) loadDebts:(void (^)(NSArray *debts))success failure:(void (^)())failure
+- (void) loadDebts:(void (^)(NSArray *debts))success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     [[RKObjectManager sharedManager] getObjectsAtPath:@"/payapp/debts"
                                            parameters:nil
@@ -195,12 +180,10 @@ static PayUserRequests *sPayUserRequests;
                                                   success(arr);
                                                   
                                               }
-                                              failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                  failure();
-                                              }];
+                                              failure:failure];
 }
 
-- (void) transferDebtsFrom:(PayUser *) from to:(PayUser *) pu success:(void (^)())success failure:(void (^)())failure
+- (void) transferDebtsFrom:(PayUser *) from to:(PayUser *) pu success:(void (^)())success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     PayTransferDebt *td = [PayTransferDebt new];
     [RKObjectManager sharedManager].requestSerializationMIMEType=RKMIMETypeJSON;
@@ -208,26 +191,22 @@ static PayUserRequests *sPayUserRequests;
     td.old_uid = from.internal_uid;
     [[RKObjectManager sharedManager] putObject:td path:@"/payapp/debts" parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         success();
-    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        failure();
-    }];
+    } failure:failure];
 }
 
 
 #pragma user stuff
-- (void) putUser:(PayUser *) user success:(void (^)(PayUser *pu))success failure:(void (^)())failure
+- (void) putUser:(PayUser *) user success:(void (^)(PayUser *pu))success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     NSString *url = @"/payapp/users";
     [RKObjectManager sharedManager].requestSerializationMIMEType=RKMIMETypeJSON;
     [[RKObjectManager sharedManager] putObject:user path:url parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         success(user);
-    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        failure();
-    }];
+    } failure:failure];
 }
 
 
-- (void) postUsers:(NSArray *) userarr success:(void (^)(NSArray *pus))success failure:(void (^)())failure
+- (void) postUsers:(NSArray *) userarr success:(void (^)(NSArray *pus))success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     NSString *url = @"/payapp/users";
     NSMutableArray *wrapperArr = [NSMutableArray new];
@@ -250,14 +229,11 @@ static PayUserRequests *sPayUserRequests;
                 [realUsers addObject:usr];
         }
         success(realUsers);
-    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        NSLog(@"failed");
-        failure();
-    }];
+    } failure:failure];
     
 }
 
-- (void) loadUsers:(void (^)(NSArray *users))success failure:(void (^)())failure uids:(NSArray*) uids
+- (void) loadUsers:(void (^)(NSArray *users))success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure uids:(NSArray*) uids
 {
     if([uids count] == 0) // avoid empty requests
     {
@@ -284,14 +260,12 @@ static PayUserRequests *sPayUserRequests;
                                                   success(realUsers);
                                                   
                                               }
-                                              failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                  failure();
-                                              }];
+                                              failure:failure];
 }
 
 #pragma currency stuff
 
-- (void) loadCountries:(void (^)(NSArray *countries))success failure:(void (^)())failure
+- (void) loadCountries:(void (^)(NSArray *countries))success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     NSString *url = @"/payapp/countries/";
     [[RKObjectManager sharedManager] getObjectsAtPath:url
@@ -302,12 +276,10 @@ static PayUserRequests *sPayUserRequests;
                                                   success(countries);
                                                   
                                               }
-                                              failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                  failure();
-                                              }];
+                                              failure:failure];
 }
 
-- (void) loadExchangeRates:(void (^)(NSArray *rates))success failure:(void (^)())failure
+- (void) loadExchangeRates:(void (^)(NSArray *rates))success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     NSString *url = @"/payapp/rates/";
     [[RKObjectManager sharedManager] getObjectsAtPath:url
@@ -318,13 +290,11 @@ static PayUserRequests *sPayUserRequests;
                                                   success(rates);
                                                   
                                               }
-                                              failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                  failure();
-                                              }];
+                                              failure:failure];
 }
 
 
-- (void) loadRates:(void (^)(NSArray *rates))success failure:(void (^)())failure
+- (void) loadRates:(void (^)(NSArray *rates))success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     NSString *url = @"/payapp/crates/";
     [[RKObjectManager sharedManager] getObjectsAtPath:url
@@ -335,13 +305,11 @@ static PayUserRequests *sPayUserRequests;
                                                   success(rates);
                                                   
                                               }
-                                              failure:^(RKObjectRequestOperation *operation, NSError *error) {
-                                                  failure();
-                                              }];
+                                              failure:failure];
 }
 
 #pragma ios_token stuff
-- (void) postIOSToken:(PayIOSToken *) token success:(void (^)())success failure:(void (^)())failure
+- (void) postIOSToken:(PayIOSToken *) token success:(void (^)())success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     NSString *url = @"/payapp/ios_token";
     
@@ -349,23 +317,18 @@ static PayUserRequests *sPayUserRequests;
     [[RKObjectManager sharedManager] postObject:token path:url parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         
         success();
-    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        NSLog(@"failed");
-        failure();
-    }];
+    } failure:failure];
     
 }
 
-- (void) clearNotificationsSuccess:(void (^)())success failure:(void (^)())failure
+- (void) clearNotificationsSuccess:(void (^)())success failure:(void (^)(RKObjectRequestOperation *operation, NSError *error))failure
 {
     
     NSString *path = @"/payapp/ios_token/badge";
     
     [[RKObjectManager sharedManager] deleteObject:nil path:path parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
         success();
-    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
-        failure();
-    } ];
+    } failure:failure];
 }
 
 #pragma mappings
@@ -485,7 +448,7 @@ static PayUserRequests *sPayUserRequests;
     // PUT MAPPING
     // Configure a request mapping for our user class.
     RKObjectMapping* transferDebtRequestMapping = [RKObjectMapping requestMapping ]; // Shortcut for [RKObjectMapping mappingForClass:[NSMutableDictionary class] ]
-//    [transferDebtRequestMapping addAttributeMappingsFromArray:@[@"", @"currency"]];
+    //    [transferDebtRequestMapping addAttributeMappingsFromArray:@[@"", @"currency"]];
     [transferDebtRequestMapping addAttributeMappingsFromDictionary:[[NSDictionary alloc] initWithObjects:@[@"old_uid", @"new_uid"] forKeys:@[@"old_uid", @"n_uid"]]];
     
     // Now configure the request descriptor
