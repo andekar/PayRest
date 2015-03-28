@@ -61,8 +61,6 @@ static PayUserRequests *sPayUserRequests;
     
     [RKMIMETypeSerialization registerClass:[RKNSJSONSerialization class] forMIMEType:@"text/html"];
     
-    NSLog(@"%@", client.defaultHeaders);
-    
     [self userMapping:objectManager];
     
     [self statusMapping:objectManager];
@@ -219,7 +217,6 @@ static PayUserRequests *sPayUserRequests;
     //    @"user_type", @"currency", @"echo_uuid",  @"uid", @"displayname"
     [RKObjectManager sharedManager].requestSerializationMIMEType=RKMIMETypeJSON;
     [[RKObjectManager sharedManager] postObject:wrapperArr path:url parameters:nil success:^(RKObjectRequestOperation *operation, RKMappingResult *mappingResult) {
-        NSLog(@"success");
         NSDictionary *dict = [mappingResult dictionary];
         NSArray *users = [dict objectForKey:@"user"];
         NSMutableArray *realUsers = [[NSMutableArray alloc] init];
