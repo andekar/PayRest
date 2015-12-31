@@ -11,7 +11,7 @@
 #import "PayTransaction.h"
 #import "PayIOSToken.h"
 #import "PayRate.h"
-#import "RKObjectRequestOperation.h"
+#import <RestKit/RKObjectRequestOperation.h>
 
 @interface PayUserRequests : NSObject
 
