@@ -37,13 +37,13 @@
 //    [[PayUserRequests payUserRequests] setDelegate:self];
     
     
-    PayUser *testUser = [PayUser new];
-    testUser.user_type = @"gmail";
-    testUser.currency = @"SEK";
-    testUser.echo_uuid = @"testecho";
-    testUser.uid = @"114115257233622203470";
+//    PayUser *testUser = [PayUser new];
+//    testUser.user_type = @"gmail";
+//    testUser.currency = @"SEK";
+//    testUser.echo_uuid = @"testecho";
+//    testUser.uid = @"114115257233622203470";
 //    testUser.username = @"andersk84@gmail.com";
-    testUser.displayname = @"this is my displayname";
+//    testUser.displayname = @"this is my displayname";
 //    [[PayUserRequests payUserRequests] loadRates:^(NSArray *rates) {
 //        NSLog(@"WHoa");
 //    } failure:^{
@@ -74,22 +74,22 @@
 //        NSLog(@"Failed with request");
 //        assert(false);
 //    } uids:@[@"andersk84@gmail.com",@"test",@"mattias.thell@gmail.com"]];
-//    [pr loadCountries:^(NSArray *countries) {
+//    [[PayUserRequests payUserRequests] loadCountries:^(NSArray *countries) {
 //        NSLog(@"here");
-//    } failure:^{
+//    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
 //        assert(false);
 //        NSLog(@"there");
 //    }];
-//    [pr loadExchangeRates:^(NSArray *rates) {
+//    [[PayUserRequests payUserRequests] loadExchangeRates:^(NSArray *rates) {
 //        NSLog(@"here");
-//    } failure:^{
+//    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
 //        
 //        NSLog(@"there");
 //        assert(false);
 //    }];
-//    [pr loadDebts:^(NSArray *debts) {
+//    [[PayUserRequests payUserRequests]  loadDebts:^(NSArray *debts) {
 //        NSLog(@"success");
-//    } failure:^{
+//    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
 //        NSLog(@"failure");
 //        assert(false);
 //    }];
@@ -99,26 +99,33 @@
 //        assert(false);
 //    }];
 //
-//    PayTransaction* transaction = [PayTransaction new];
-//    transaction.amount = [NSNumber numberWithDouble:20.0];
-//    transaction.currency = @"SEK";
-//    transaction.paid_by = @"andersk84@gmail.com";
-//    transaction.paid_for = @"ffaaf593-ff96-4c7a-ab22-d756b5fdc470";
-//    transaction.echo_uuid = @"echo";
-//    transaction.reason = @"testreason";
-//    PayOrgTransaction *orgt =[PayOrgTransaction new];
-//    orgt.currency = @"SEK";
-//    orgt.amount =[NSNumber numberWithDouble:20.0];
-//    transaction.org_transaction = orgt;
-//    [pr postTransactions:@[transaction] success:^(NSArray *transactions) {
-//        [pr deleteTransaction:[transactions firstObject] success:^{
-//            NSLog(@"ok");
-//        } failure:^{
-//            assert(false);
-//        }];
-//    } failure:^{
-//        assert(false);
-//    }];
+    NSDate *today = [NSDate date];
+//    [[today timeIntervalSince1970] ]
+//    time_t unixTime = (time_t) [[NSDate date] timeIntervalSince1970];
+
+//    NSString *t = [[[NSString alloc] initWithFormat:@"%d" arguments:unixTime];
+    NSString *todayStr = [[NSNumber numberWithInteger:[[NSNumber numberWithDouble:[today timeIntervalSince1970] * 1000000] integerValue]] stringValue];
+    PayTransaction* transaction = [PayTransaction new];
+    transaction.amount = [NSNumber numberWithDouble:20.0];
+    transaction.currency = @"SEK";
+    transaction.paid_by = @"andersk84@gmail.com";
+    transaction.paid_for = @"f1633a14-dd24-4f96-94bb-12c6944cf7be";
+    transaction.echo_uuid = @"echo";
+    transaction.reason = @"testreason";
+    transaction.timestamp = todayStr;
+    PayOrgTransaction *orgt =[PayOrgTransaction new];
+    orgt.currency = @"SEK";
+    orgt.amount =[NSNumber numberWithDouble:20.0];
+    transaction.org_transaction = orgt;
+    [[PayUserRequests payUserRequests] postTransactions:@[transaction] success:^(NSArray *transactions) {
+        [[PayUserRequests payUserRequests] deleteTransaction:[transactions firstObject] success:^{
+            NSLog(@"ok");
+        } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+            assert(false);
+        }];
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        assert(false);
+    }];
 //    PayIOSToken *token = [PayIOSToken new];
 //    [token setIos_token:@"TOKENTOKEN"];
 //    [pr postIOSToken:token success:^() {

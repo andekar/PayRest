@@ -495,7 +495,7 @@ static PayUserRequests *sPayUserRequests;
     
     // Configure a request mapping for our transaction class.
     RKObjectMapping* transactionRequestMapping = [RKObjectMapping requestMapping ]; // Shortcut for [RKObjectMapping mappingForClass:[NSMutableDictionary class] ]
-    [transactionRequestMapping addAttributeMappingsFromArray:@[ @"reason", @"amount", @"paid_by", @"paid_for", @"currency", @"echo_uuid"]];
+    [transactionRequestMapping addAttributeMappingsFromArray:@[ @"reason", @"amount", @"paid_by", @"paid_for", @"currency", @"echo_uuid", @"timestamp"]];
     
     [transactionRequestMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:@"org_transaction" toKeyPath:@"org_transaction" withMapping:orgTransactionRMapping]];
     
